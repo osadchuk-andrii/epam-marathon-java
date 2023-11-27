@@ -80,12 +80,16 @@ public class DynamoDBServiceImpl implements DynamoDBService {
     @Override
     public String updateUser(Map<String, String> pathParameters, String inputBody) {
 
-        //TODO Implement a record update by Id
-        /*
-        Add code that accepts parameters, finds required record by Id,
-        and update it in the table record according to provided parameters.
-        Returns a text message as operation result.
-        */
+        User userToUpdate = dynamoDBMapper.load(User.class, pathParameters.get(TABLE_PARTITION_KEY));
+        if (userToUpdate == null) {
+            return getJsonResponse("User not found");
+        }
+
+        User inputUser = new Gson().fromJson(inputBody, User.class);
+        updateUsersNotNullAttributes(userToUpdate, inputUser);
+
+        dynamoDBMapper.save(userToUpdate);
+        return getJsonResponse("User updated: " + userToUpdate.getEmail());
     }
 
     @Override
